@@ -17,25 +17,23 @@ public class ProjectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrfConfig -> csrfConfig.disable());
         http.authorizeHttpRequests((requests) -> {
-            requests.requestMatchers("/myAccount","/myBalance").authenticated()
+            requests.requestMatchers("/myAccount").hasRole("ADMIN") //skal være ROLE_ADMIN i databasen.
+                    .requestMatchers("/myBalance").hasAnyRole("ADMIN","SALES")
                     .requestMatchers("/contact","/register").permitAll();
         });
-        //http.formLogin(flc -> flc.disable() ); //bruger browsers default login skærm
+        //http.formLogin(flc -> flc.disable() ); //bruger browsers default login skærm, så stadig login skærm.
         http.formLogin(Customizer.withDefaults() );
         http.httpBasic(Customizer.withDefaults());
         var obj = http.build();
         return obj;
     }
 
-    public PasswordEncoder passwordEncoderNone() {
-        return NoOpPasswordEncoder.getInstance();
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
+        //return NoOpPasswordEncoder.getInstance(); //Man kan slippe for at kryptere sine passwords
         //var obj = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         //return obj;
-        return new BCryptPasswordEncoder(20);
+        return new BCryptPasswordEncoder(10);
     }
 
 
